@@ -1,1 +1,438 @@
-/
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>יוצר טוקנים</title>
+    <!-- טעינת Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* הגדרת פונט ברירת מחדל שתומך בעברית */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        }
+        /* אנימציית סיבוב פשוטה לטוען */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ffffff;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-6">צור טוקן מאומת</h1>
+
+        <!-- אזור סטטוס וטעינה -->
+        <div id="loader" class="hidden flex items-center justify-center mb-4">
+            <div class="spinner"></div>
+            <span class="mr-3">מבצע פעולה...</span>
+        </div>
+        <div id="status-message" class="text-center mb-4 text-red-400"></div>
+
+        <!-- שלב 1: התחברות -->
+        <form id="login-section">
+            <div class="mb-4">
+                <label for="username" class="block text-sm font-medium text-gray-300 mb-2">מספר מערכת</label>
+                <input type="text" id="username" required
+                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="password" class="block text-sm font-medium text-gray-300 mb-2">סיסמת ניהול</label>
+                <input type="password" id="password" required
+                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button type="submit" id="login-button"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                התחבר
+            </button>
+        </form>
+
+        <!-- שלב 2: אימות דו-שלבי (MFA) -->
+        <div id="mfa-section" class="hidden">
+            <h2 class="text-xl font-semibold text-center mb-4">נדרש אימות דו-שלבי</h2>
+            
+            <!-- בחירת שיטת אימות -->
+            <div id="mfa-methods-container" class="mb-4">
+                <label for="mfa-methods" class="block text-sm font-medium text-gray-300 mb-2">בחר שיטת אימות</label>
+                <select id="mfa-methods"
+                        class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <!-- אופציות יתווספו דינמית -->
+                </select>
+            </div>
+            <button id="send-code-button"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 mb-4">
+                שלח קוד אימות
+            </button>
+
+            <!-- הזנת קוד -->
+            <form id="mfa-code-form" class="hidden">
+                <div class="mb-4">
+                    <label for="mfa-code" class="block text-sm font-medium text-gray-300 mb-2">קוד אימות</label>
+                    <input type="text" id="mfa-code" inputmode="numeric" pattern="[0-9]*"
+                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                           placeholder="הזן את הקוד שקיבלת">
+                </div>
+                
+                <!-- 'זכור אותי' הוסר -->
+
+                <button type="submit" id="verify-code-button"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 mt-4">
+                    אמת קוד
+                </button>
+            </form>
+        </div>
+
+        <!-- שלב 3: הצלחה -->
+        <div id="success-section" class="hidden">
+            <h2 class="text-xl font-semibold text-center mb-4 text-green-400">ההתחברות הצליחה!</h2>
+            <div class="mb-4">
+                <label for="final-token" class="block text-sm font-medium text-gray-300 mb-2">הטוקן שלך</label>
+                <textarea id="final-token" readonly
+                          class="w-full p-3 bg-gray-900 border border-gray-600 rounded-lg text-gray-200 text-sm font-mono break-all"
+                          rows="4"></textarea>
+            </div>
+            <div class="text-sm text-gray-400 mb-4">
+                <strong>סיבת מעבר אימות:</strong> <span id="pass-reason"></span>
+            </div>
+            <button id="copy-token-button"
+                    class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 mb-2">
+                העתק טוקן
+            </button>
+            <button id="start-over-button"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                התחל מחדש
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // הפניות לרכיבי DOM
+        const loginSection = document.getElementById('login-section');
+        const mfaSection = document.getElementById('mfa-section');
+        const successSection = document.getElementById('success-section');
+        const loader = document.getElementById('loader');
+        const statusMessage = document.getElementById('status-message');
+        const mfaCodeForm = document.getElementById('mfa-code-form');
+        const mfaMethodsContainer = document.getElementById('mfa-methods-container');
+        const mfaMethodsSelect = document.getElementById('mfa-methods');
+
+        // כפתורים
+        const loginButton = document.getElementById('login-button');
+        const sendCodeButton = document.getElementById('send-code-button');
+        const verifyCodeButton = document.getElementById('verify-code-button');
+        const copyTokenButton = document.getElementById('copy-token-button');
+        const startOverButton = document.getElementById('start-over-button');
+
+        // שדות קלט
+        // const apiUrlInput = document.getElementById('api-url'); // הוסר כי הכתובות קבועות
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const mfaCodeInput = document.getElementById('mfa-code');
+        // const rememberMeInput = document.getElementById('remember-me'); // הוסר
+        const finalTokenInput = document.getElementById('final-token');
+        const passReasonSpan = document.getElementById('pass-reason');
+
+        const LOGIN_URL = 'https://www.call2all.co.il/ym/api/Login';
+        const MFA_URL = 'https://www.call2all.co.il/ym/api/MFASession';
+
+        // משתני מצב
+        let currentToken = null;
+        let mfaMethodsData = [];
+        
+        // פונקציית עזר לניהול קריאות API
+        async function handleApiCall(url, params) {
+            loader.classList.remove('hidden');
+            statusMessage.textContent = '';
+            
+            // בנה את גוף הבקשה כ-URL-encoded
+            const body = new URLSearchParams();
+            for (const key in params) {
+                body.append(key, params[key]);
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: body.toString()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`שגיאת רשת: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.responseStatus !== 'OK') {
+                    throw new Error(data.message || 'אירעה שגיאה לא ידועה מהשרת');
+                }
+
+                return data; // החזרת נתונים תקינים
+            } catch (error) {
+                console.error('שגיאה בקריאת API:', error);
+                statusMessage.textContent = error.message;
+                return null; // החזרת null לציון כישלון
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // שלב 1: טיפול בהתחברות
+        loginSection.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!username || !password) {
+                statusMessage.textContent = 'יש למלא את כל השדות.';
+                return;
+            }
+
+            const data = await handleApiCall(LOGIN_URL, {
+                username: username,
+                password: password
+            });
+
+            if (data && data.token) {
+                currentToken = data.token;
+                statusMessage.textContent = '';
+                // לאחר קבלת טוקן, בדוק מיד את מצב ה-MFA
+                await checkMfaStatus();
+            }
+        });
+
+        // שלב 2: בדיקת מצב MFA
+        async function checkMfaStatus() {
+            const data = await handleApiCall(MFA_URL, {
+                token: currentToken,
+                action: 'isPass'
+            });
+
+            if (data) {
+                const forceHardMfaReasons = ['INIT_WHITELIST_IPS', 'INIT_MASTER_LOGIN_WHITELIST_IPS', 'HAVE_ACTIVE_TRUST_TOKEN', 'API_SKIP_FOR_MFA'];
+
+                if (data.isPass) {
+                    if (forceHardMfaReasons.includes(data.passReason)) {
+                        // עבר אימות עם פטור, אבל אנחנו *מכריחים* אימות קשיח
+                        // בדוק אם יש שיטות זמינות (לפי התיעוד isPass מחזיר isAvailable)
+                        if (data.isAvailable) {
+                            await getMfaMethods();
+                        } else {
+                            statusMessage.textContent = 'נדרש אימות דו-שלבי אך אין שיטות אימות זמינות לחשבונך.';
+                        }
+                    } else {
+                        // הצלחה! עבר אימות (והסיבה היא *לא* אחת מאלה שדורשות אימות קשיח)
+                        showSuccess(data.passReason);
+                    }
+                } else {
+                    // isPass הוא false, נדרש אימות. נסה לעבור אוטומטית.
+                    await tryAutoMfa();
+                }
+            }
+        }
+
+        async function tryAutoMfa() {
+            const data = await handleApiCall(MFA_URL, {
+                token: currentToken,
+                action: 'try'
+            });
+
+            if (data) {
+                const forceHardMfaReasons = ['INIT_WHITELIST_IPS', 'INIT_MASTER_LOGIN_WHITELIST_IPS', 'HAVE_ACTIVE_TRUST_TOKEN'];
+
+                if (data.isPass) {
+                    if (forceHardMfaReasons.includes(data.passReason)) {
+                        // עבר אימות עם פטור (למשל IP לבן), אבל אנחנו *מכריחים* אימות קשיח
+                        if (data.isAvailable) {
+                            await getMfaMethods();
+                        } else {
+                            statusMessage.textContent = 'נדרש אימות דו-שלבי אך אין שיטות אימות זמינות לחשבונך.';
+                        }
+                    } else {
+                        // הצלחה! עבר אימות אוטומטי (והסיבה היא *לא* אחת מאלה שדורשות אימות קשיח)
+                        showSuccess(data.passReason);
+                    }
+                } else if (data.isAvailable) { // isPass הוא false
+                    // נכשל מעבר אוטומטי (isPass: false), אבל יש שיטות זמינות
+                    // קבל את רשימת השיטות
+                    await getMfaMethods();
+                } else { // isPass הוא false וגם isAvailable הוא false
+                    // נכשל ואין שיטות זמינות
+                    statusMessage.textContent = 'נדרש אימות דו-שלבי אך אין שיטות אימות זמינות לחשבונך.';
+                }
+            }
+        }
+
+        // שלב 3: קבלת שיטות אימות
+        async function getMfaMethods() {
+            const data = await handleApiCall(MFA_URL, {
+                token: currentToken,
+                action: 'getMFAMethods'
+            });
+
+            if (data && data.mfaMethods && data.mfaMethods.length > 0) {
+                mfaMethodsData = data.mfaMethods;
+                mfaMethodsSelect.innerHTML = ''; // נקה אופציות קודמות
+                
+                mfaMethodsData.forEach(method => {
+                    // צור אופציה לכל סוג שליחה (CALL, SMS, EMAIL)
+                    method.SEND_TYPE.forEach(sendType => {
+                        const option = document.createElement('option');
+                        // שמור את ה-ID ואת סוג השליחה בערך האופציה
+                        option.value = `${method.ID}|${sendType}`;
+                        option.textContent = `${method.NOTE || method.NIKE} (${sendType}) - ${method.VALUE}`;
+                        mfaMethodsSelect.appendChild(option);
+                    });
+                });
+
+                // הצג את ממשק ה-MFA
+                loginSection.classList.add('hidden');
+                mfaSection.classList.remove('hidden');
+                mfaCodeForm.classList.add('hidden'); // הסתר טופס קוד עד לשליחה
+            } else {
+                statusMessage.textContent = 'לא נמצאו שיטות אימות זמינות.';
+            }
+        }
+
+        // שלב 4: שליחת קוד אימות
+        sendCodeButton.addEventListener('click', async () => {
+            const selectedOption = mfaMethodsSelect.value;
+            if (!selectedOption) {
+                statusMessage.textContent = 'יש לבחור שיטת אימות.';
+                return;
+            }
+
+            const [mfaId, mfaSendType] = selectedOption.split('|');
+
+            const data = await handleApiCall(MFA_URL, {
+                token: currentToken,
+                action: 'sendMFA',
+                mfaId: mfaId,
+                mfaSendType: mfaSendType,
+                lang: 'HE'
+            });
+
+            if (data) {
+                // הצג את טופס הזנת הקוד
+                statusMessage.textContent = 'קוד אימות נשלח בהצלחה.';
+                statusMessage.classList.remove('text-red-400');
+                statusMessage.classList.add('text-green-400');
+                mfaCodeForm.classList.remove('hidden');
+                mfaMethodsContainer.classList.add('hidden'); // הסתר בחירת שיטות
+                sendCodeButton.classList.add('hidden'); // הסתר כפתור שליחה
+            } else {
+                statusMessage.classList.add('text-red-400');
+                statusMessage.classList.remove('text-green-400');
+            }
+        });
+
+        // שלב 5: אימות הקוד
+        mfaCodeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mfaCode = mfaCodeInput.value.trim();
+            const mfaRememberMe = false; // האפשרות הוסרה, תמיד שולח false
+
+            if (!mfaCode) {
+                statusMessage.textContent = 'יש להזין את קוד האימות.';
+                statusMessage.classList.add('text-red-400');
+                statusMessage.classList.remove('text-green-400');
+                return;
+            }
+
+            const data = await handleApiCall(MFA_URL, {
+                token: currentToken,
+                action: 'validMFA',
+                mfaCode: mfaCode,
+                mfaRememberMe: mfaRememberMe
+            });
+
+            if (data) {
+                statusMessage.classList.remove('text-green-400');
+                statusMessage.classList.add('text-red-400');
+
+                switch (data.mfa_valid_status) {
+                    case 'VALID':
+                        // הצלחה סופית!
+                        showSuccess('MFA_PASSED'); // עבר אימות בפועל
+                        break;
+                    case 'UNVALID':
+                        statusMessage.textContent = `קוד שגוי. נותרו ${data.mfa_valid_left} ניסיונות.`;
+                        break;
+                    case 'OVERTRY':
+                        statusMessage.textContent = 'ניסיונות רבים מדי. יש לשלוח קוד חדש.';
+                        // אפס את ממשק ה-MFA לשליחה חוזרת
+                        mfaCodeForm.classList.add('hidden');
+                        mfaMethodsContainer.classList.remove('hidden');
+                        sendCodeButton.classList.remove('hidden');
+                        mfaCodeInput.value = '';
+                        break;
+                    default:
+                        statusMessage.textContent = data.mfa_valid_message || 'שגיאה באימות הקוד.';
+                }
+            }
+        });
+
+        // פונקציית הצלחה
+        function showSuccess(passReason) {
+            loginSection.classList.add('hidden');
+            mfaSection.classList.add('hidden');
+            successSection.classList.remove('hidden');
+            statusMessage.textContent = '';
+
+            finalTokenInput.value = currentToken;
+            passReasonSpan.textContent = passReason;
+        }
+
+        // העתקת טוקן
+        copyTokenButton.addEventListener('click', () => {
+            finalTokenInput.select();
+            // שימוש ב-execCommand לתאימות טובה יותר בתוך iframes
+            try {
+                document.execCommand('copy');
+                statusMessage.textContent = 'הטוקן הועתק!';
+                statusMessage.classList.remove('text-red-400');
+                statusMessage.classList.add('text-green-400');
+            } catch (err) {
+                statusMessage.textContent = 'שגיאה בהעתקה.';
+                statusMessage.classList.add('text-red-400');
+                statusMessage.classList.remove('text-green-400');
+            }
+            window.getSelection().removeAllRanges(); // בטל בחירה
+        });
+
+        // התחל מחדש
+        startOverButton.addEventListener('click', () => {
+            // איפוס כל המשתנים והממשק
+            currentToken = null;
+            mfaMethodsData = [];
+            
+            loginSection.classList.remove('hidden');
+            mfaSection.classList.add('hidden');
+            successSection.classList.add('hidden');
+
+            statusMessage.textContent = '';
+            statusMessage.classList.remove('text-green-400');
+            statusMessage.classList.add('text-red-400');
+
+            loginSection.reset();
+            mfaCodeForm.reset();
+            
+            mfaCodeForm.classList.add('hidden');
+            mfaMethodsContainer.classList.remove('hidden');
+            sendCodeButton.classList.remove('hidden');
+        });
+
+    </script>
+</body>
+</html>
