@@ -249,7 +249,7 @@
             });
 
             if (data) {
-                const forceHardMfaReasons = ['INIT_WHITELIST_IPS', 'INIT_MASTER_LOGIN_WHITELIST_IPS', 'HAVE_ACTIVE_TRUST_TOKEN'];
+                const forceHardMfaReasons = ['INIT_WHITELIST_IPS', 'INIT_MASTER_LOGIN_WHITELIST_IPS', 'HAVE_ACTIVE_TRUST_TOKEN', 'API_SKIP_FOR_MFA'];
 
                 if (data.isPass) {
                     if (forceHardMfaReasons.includes(data.passReason)) {
