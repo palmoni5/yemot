@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסבר: הפקת מפתח Google API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            padding: 15px;
+            background-color: #fff;
+            color: #333;
+            max-width: 800px; /* הגבלת רוחב לקריאה נוחה */
+            margin: 0 auto;   /* מירכוז העמוד */
+        }
+        h4 {
+            color: #003777;
+            border-bottom: 2px solid #003777;
+            padding-bottom: 5px;
+            margin-top: 0;
+        }
+        h3 {
+            margin-top: 20px;
+        }
+        .link-box {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            font-size: 0.9em;
+        }
+        .step {
+            margin-bottom: 15px;
+        }
+        .step h5 {
+            color: #d9534f;
+            margin-top: 0;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .cloud-link {
+            font-weight: bold;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .cloud-link:hover {
+            text-decoration: underline;
+        }
+        strong {
+            font-weight: bold;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+        /* עיצוב בסיסי לכפתור */
+        input[type="button"] {
+            padding: 8px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="button"]:hover {
+            background-color: #e2e6ea;
+        }
+    </style>
+</head>
+<body>
+
+    <h4>🔑 הסבר: הפקת מפתח Google API</h4>
+
+    <p>
+        המפתח שאתם מפיקים חיוני להפעלת שירות <strong>Google Text-to-Speech (TTS)</strong>. שירות זה הוא הליבה של המערכת, והוא מאפשר המרת טקסט המיילים שלכם לקבצי קול באיכות גבוהה וטבעית.
+    </p>
+
+    <hr>
+
+    <h3>🛠️ שלבים עיקריים להפקת המפתח</h3>
+
+    <div class="step">
+        <h5>1. כניסה ל-<a href="https://console.cloud.google.com/" target="_blank" class="cloud-link">Google Cloud Console</a></h5>
+        <p>
+            התחילו בכניסה למערכת הניהול של שירותי גוגל. זהו המקום שבו מנהלים את המשאבים הדיגיטליים שלכם בגוגל.
+        </p>
+    </div>
+
+    <div class="step">
+        <h5>2. בחירת/יצירת פרויקט</h5>
+        <p>
+            כל פעילות ב-Google Cloud מתבצעת תחת פרויקט מסוים. צרו פרויקט חדש עבור שירות זה או בחרו פרויקט קיים שאותו תרצו לשייך לשירות.
+        </p>
+    </div>
+
+    <div class="step">
+        <h5>3. הפעלת שירותי ה-API הנדרשים</h5>
+        <p>
+            עליכם להפעיל באופן מפורש את שני השירותים הבאים בתוך <strong>APIs & Services</strong>:
+        </p>
+        <ul>
+            <li><strong>Cloud Text-to-Speech API:</strong> השירות שממיר את הטקסט לקול.</li>
+            <li><strong>Cloud Translation API:</strong> נדרש לטיפול במיילים שאינם כתובים בעברית.</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h5>4. יצירת מפתח API</h5>
+        <p>
+            נווטו אל <strong>APIs & Services > Credentials</strong> (ממשקים ואישורים). שם, צרו מפתח API (<strong>API Key</strong>).
+        </p>
+    </div>
+
+    <div class="step">
+        <h5>5. העתקה ושימוש</h5>
+        <p>
+            העתיקו את המפתח שנוצר והדביקו אותו במקום המיועד לכך ביישום.
+        </p>
+    </div>
+
+    <div class="link-box">
+        <p>
+            <a href="https://cloud.google.com/docs/authentication/api-keys?hl=iw" target="_blank">למדריך מפורט של גוגל בנושא יצירת מפתח API</a>
+        </p>
+    </div>
+    <br>
+    
+    <input type="button" value="סגור חלון" onclick="if(typeof google !== 'undefined' && google.script){google.script.host.close()}else{alert('הפקודה לסגירת החלון פעילה רק בתוך תוסף גוגל')}" />
+
+</body>
+</html>
