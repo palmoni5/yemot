@@ -57,17 +57,6 @@
             border-top: 1px solid #eee;
             margin: 20px 0;
         }
-        /* עיצוב בסיסי לכפתור */
-        input[type="button"] {
-            padding: 8px 15px;
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        input[type="button"]:hover {
-            background-color: #e2e6ea;
-        }
     </style>
 </head>
 <body>
@@ -126,9 +115,6 @@
             <a href="https://cloud.google.com/docs/authentication/api-keys?hl=iw" target="_blank">למדריך מפורט של גוגל בנושא יצירת מפתח API</a>
         </p>
     </div>
-    <br>
     
-    <input type="button" value="סגור חלון" onclick="if(typeof google !== 'undefined' && google.script){google.script.host.close()}else{alert('הפקודה לסגירת החלון פעילה רק בתוך תוסף גוגל')}" />
-
 </body>
 </html>
